@@ -206,7 +206,7 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t *pamh, int flags,
     if (!(crypted_password = crypt(password, stored_crypted_password)))
 #endif
     {
-	pam_syslog(pamh, LOG_ERR, "crypt() failed");
+	pam_syslog(pamh, LOG_ERR, "crypt() failed, rc=%d, stored'%s'", errno, stored_crypted_password);
 	free(linebuf);
 	return PAM_AUTH_ERR;
     }
@@ -217,6 +217,8 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t *pamh, int flags,
 	else
 	    crypted_password = bigcrypt(password, stored_crypted_password);
     }
+
+    // if (debug) pam_syslog(pamh, LOG_DEBUG, "checked, given == '%s' crypted password == '%s'", password, crypted_password);
 
     if (strcmp(crypted_password, stored_crypted_password)) {
 	pam_syslog(pamh, LOG_NOTICE, "wrong password for user %s", name);
